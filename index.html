@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英文口試（Oral）180 張溫習 Flashcards</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Inter 與 Noto Sans TC 字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            blush: {
+              50: '#fff8fa',
+              100: '#ffeff4',
+              200: '#ffe0ea',
+              300: '#ffc2d6',
+              400: '#ff94b8',
+              500: '#f46496',
+              600: '#db4178',
+              700: '#b82d60',
+            },
+            plum: {
+              700: '#5e4959',
+              800: '#3e2d3a',
+              900: '#2b1e28',
+            }
+          },
+          boxShadow: {
+            'soft-pink': '0 12px 36px -8px rgba(244, 100, 150, 0.14), 0 4px 12px -4px rgba(184, 45, 96, 0.06)',
+            'soft-btn': '0 4px 12px -2px rgba(244, 100, 150, 0.18)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* 基礎背景與字體柔化 */
+    body {
+      background-color: #fff7f9;
+      background-image:
+        radial-gradient(circle at 12% 10%, rgba(255, 206, 224, 0.45) 0%, transparent 42%),
+        radial-gradient(circle at 88% 18%, rgba(255, 224, 236, 0.5) 0%, transparent 40%),
+        radial-gradient(circle at 50% 95%, rgba(255, 214, 229, 0.35) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: #2b1e28;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 平滑翻面過渡動畫（不使用 3D absolute 疊層，徹底杜絕高度截斷 BUG） */
+    @keyframes flipReveal {
+      0% {
+        opacity: 0;
+        transform: perspective(900px) rotateX(-8deg) scale(0.985);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(900px) rotateX(0deg) scale(1);
+      }
+    }
+
+    .animate-flip-reveal {
+      animation: flipReveal 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-card-switch {
+      animation: slideFadeIn 0.22s ease-out forwards;
+    }
+
+    /* 語音朗讀波紋微動畫 */
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.85; }
+    }
+    .speaking-pulse {
+      animation: pulseSoft 1.2s ease-in-out infinite;
+    }
+
+    /* 客製化細緻捲軸（行動與桌面都美觀） */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fff1f5;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #f8b4cb;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f46496;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-blush-200 selection:text-plum-900">
+
+  <!-- 主容器：自然流動佈局，完全避免高度鎖死導致裁切 -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8 pb-14">
+
+    <!-- 頁首：標題與總熟習進度 -->
+    <header class="bg-white/85 backdrop-blur-md border border-blush-200/80 rounded-3xl p-4 sm:p-6 shadow-soft-pink mb-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blush-100 text-blush-700 text-xs font-semibold mb-1.5">
+            <span>🌸</span>
+            <span>30 題全覆蓋 · 共 180 張卡片</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-plum-900 tracking-tight">
+            英文口試（Oral）溫習 Flashcards
+          </h1>
+        </div>
+
+        <!-- 右側熟習度統計與重設 -->
+        <div class="flex items-center justify-between sm:justify-end gap-3">
+          <div class="text-left sm:text-right">
+            <div class="text-xs text-plum-700/80 font-medium">總熟習進度</div>
+            <div class="text-sm sm:text-base font-bold text-blush-600">
+              <span id="masteredCount">0</span> / <span id="totalCardsHeader">180</span> 張已熟習
+            </div>
+          </div>
+          <button
+            id="openResetModalBtn"
+            type="button"
+            class="px-3 py-2 rounded-xl text-xs font-medium text-plum-700 bg-blush-50 hover:bg-blush-100 border border-blush-200 transition-colors"
+            title="重設所有學習紀錄"
+          >
+            重設紀錄
+          </button>
+        </div>
+      </div>
+
+      <!-- 熟習進度條 -->
+      <div class="mt-4">
+        <div class="w-full h-2.5 bg-blush-100 rounded-full overflow-hidden flex">
+          <div id="masteredBar" class="h-full bg-gradient-to-r from-blush-400 to-blush-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="flex items-center justify-between mt-1.5 text-xs text-plum-700/80">
+          <span id="progressDetailText">待重溫：0 張 · 未標記：180 張</span>
+          <span id="masteredPercentText" class="font-semibold text-blush-600">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 篩選與模式控制面板 -->
+    <section class="bg-white/85 backdrop-blur-md border border-blush-200/80 rounded-3xl p-4 sm:p-5 shadow-soft-pink mb-5 space-y-3.5">
+      <!-- 分類篩選按鈕 -->
+      <div class="flex flex-wrap gap-2" id="categoryFilterBar" role="tablist" aria-label="卡片分類篩選">
+        <button data-cat="all" class="cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
+          全部 <span class="opacity-80">(180)</span>
+        </button>
+        <button data-cat="opening" class="cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
+          開頭 <span class="opacity-80">(30)</span>
+        </button>
+        <button data-cat="ending" class="cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
+          結尾 <span class="opacity-80">(30)</span>
+        </button>
+        <button data-cat="hook" class="cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
+          扣題句 <span class="opacity-80">(30)</span>
+        </button>
+        <button data-cat="reason" class="cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all">
+          Reason 1-3 <span class="opacity-80">(90)</span>
+        </button>
+      </div>
+
+      <!-- Reason 細分按鈕列（僅在選擇 Reason 1-3 時顯示） -->
+      <div id="reasonSubBar" class="hidden flex-wrap items-center gap-2 pt-1 border-t border-blush-100">
+        <span class="text-xs font-medium text-plum-700 mr-1">細分論點：</span>
+        <button data-sub="all" class="sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">全部 Reason (90)</button>
+        <button data-sub="reason1" class="sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Reason 1 (30)</button>
+        <button data-sub="reason2" class="sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Reason 2 (30)</button>
+        <button data-sub="reason3" class="sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all">Reason 3 (30)</button>
+      </div>
+
+      <!-- 組別篩選、題號快速跳轉、洗牌與待重溫模式 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1">
+        <!-- 組別篩選 -->
+        <div class="lg:col-span-4">
+          <label for="groupSelect" class="sr-only">組別篩選</label>
+          <select id="groupSelect" class="w-full px-3.5 py-2.5 rounded-2xl bg-blush-50/80 border border-blush-200 text-xs sm:text-sm font-medium text-plum-800 focus:outline-none focus:ring-2 focus:ring-blush-400">
+            <option value="all">全部組別（30 題）</option>
+            <option value="GP1">GP1 人物篇（No.1, 3, 11, 23）</option>
+            <option value="GP2">GP2 經歷與回憶（No.2, 4, 10, 12, 22, 27）</option>
+            <option value="GP3">GP3 夢想與未來（No.5, 9, 19, 26, 30）</option>
+            <option value="GP4">GP4 挑戰與任務（No.6, 20, 24, 29）</option>
+            <option value="GP5">GP5 媒體與休閒（No.8, 13, 15, 18）</option>
+            <option value="GP6">GP6 物品篇（No.17, 21, 25）</option>
+            <option value="GP7A">GP7A 食物篇（No.16, 28）</option>
+            <option value="GP7B">GP7B 景點與動物（No.7, 14）</option>
+          </select>
+        </div>
+
+        <!-- 題號快速跳轉 -->
+        <div class="lg:col-span-4">
+          <label for="topicSelect" class="sr-only">按題號快速篩選</label>
+          <select id="topicSelect" class="w-full px-3.5 py-2.5 rounded-2xl bg-blush-50/80 border border-blush-200 text-xs sm:text-sm font-medium text-plum-800 focus:outline-none focus:ring-2 focus:ring-blush-400">
+            <option value="all">全部題號（No.1 – No.30）</option>
+          </select>
+        </div>
+
+        <!-- 隨機抽卡 / 只溫待重溫 -->
+        <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-2">
+          <button
+            id="shuffleBtn"
+            type="button"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all"
+          >
+            <span id="shuffleIcon">🔀</span>
+            <span id="shuffleLabel">順序模式</span>
+          </button>
+
+          <button
+            id="reviewOnlyBtn"
+            type="button"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all"
+          >
+            <span>📌</span>
+            <span>待重溫</span>
+            <span id="reviewBadgeCount" class="px-1.5 py-0.5 rounded-full text-[11px] bg-blush-100 text-blush-700">0</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 篩選結果為空時的提示狀態 -->
+    <section id="emptyState" class="hidden bg-white/90 border border-blush-200 rounded-3xl p-8 sm:p-12 text-center shadow-soft-pink">
+      <div class="text-4xl mb-3">🌷</div>
+      <h2 class="text-lg font-bold text-plum-900 mb-1.5">目前篩選條件下沒有卡片</h2>
+      <p class="text-sm text-plum-700 mb-5">可能是「只溫待重溫卡片」中尚未標記符合此條件的卡片。</p>
+      <button
+        id="clearFiltersBtn"
+        type="button"
+        class="px-5 py-2.5 rounded-2xl bg-blush-500 hover:bg-blush-600 text-white text-sm font-semibold shadow-soft-btn transition-all"
+      >
+        顯示全部 180 張卡片
+      </button>
+    </section>
+
+    <!-- 主 Flashcard 區域 -->
+    <main id="cardStage">
+      <!-- 卡片上方資訊列：目前進度、重新洗牌、語音速度 -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <span class="text-sm sm:text-base font-bold text-plum-900">
+            第 <span id="currentIdxDisplay" class="text-blush-600">1</span> / <span id="filteredTotalDisplay">180</span> 張
+          </span>
+          <button
+            id="reshuffleBtn"
+            type="button"
+            class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold bg-blush-100 hover:bg-blush-200 text-blush-700 transition-colors"
+          >
+            ↻ 重新洗牌
+          </button>
+        </div>
+
+        <!-- 語音速度設定 -->
+        <div class="flex items-center gap-1.5 text-xs text-plum-700">
+          <span class="hidden sm:inline">朗讀語速：</span>
+          <button id="speedBtn" type="button" class="px-2.5 py-1 rounded-xl bg-white/90 border border-blush-200 hover:bg-blush-50 font-semibold text-plum-800 transition-colors">
+            1.0x 正常
+          </button>
+          <button id="accentBtn" type="button" class="px-2.5 py-1 rounded-xl bg-white/90 border border-blush-200 hover:bg-blush-50 font-semibold text-plum-800 transition-colors">
+            🇬🇧 英式
+          </button>
+        </div>
+      </div>
+
+      <!-- 單張自動高度卡片（絕無 overflow-hidden 截斷問題！） -->
+      <article
+        id="flashcard"
+        tabindex="0"
+        role="button"
+        aria-label="點擊翻轉卡片查看正反面"
+        class="relative w-full min-h-[300px] sm:min-h-[340px] h-auto bg-white/95 border-2 border-blush-200/90 hover:border-blush-300 rounded-[2rem] shadow-soft-pink p-5 sm:p-8 cursor-pointer transition-colors flex flex-col justify-between select-text focus:outline-none focus:ring-2 focus:ring-blush-400"
+      >
+        <!-- 卡片頂部徽章列 -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-blush-100">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- 正面/背面狀態標籤 -->
+            <span id="cardSideBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blush-500 text-white">
+              正面 · 題目
+            </span>
+            <!-- 題號與組別徽章 -->
+            <span id="cardTopicGroupBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blush-100 text-blush-700">
+              No.1 · GP1 人物篇
+            </span>
+            <!-- 學習狀態小徽章 -->
+            <span id="cardStatusBadge" class="hidden inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"></span>
+          </div>
+
+          <!-- 英文語音朗讀按鈕（阻止事件冒泡避免誤翻卡） -->
+          <button
+            id="speakBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-blush-50 hover:bg-blush-100 active:scale-95 border border-blush-200 text-blush-700 text-xs sm:text-sm font-semibold transition-all"
+            title="朗讀英文內容"
+          >
+            <svg id="speakIconSvg" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <span id="speakBtnText">朗讀英文</span>
+          </button>
+        </div>
+
+        <!-- 卡片內容區（動態撐開高度，確保長文 100% 完整顯示） -->
+        <div id="cardBody" class="py-6 sm:py-8 flex-1 flex flex-col justify-center">
+          <!-- 正面內容 -->
+          <div id="frontView" class="space-y-4 text-center py-4 sm:py-6">
+            <div id="frontDisplayContent" class="text-xl sm:text-2xl md:text-[1.65rem] font-bold text-plum-900 leading-relaxed tracking-tight break-words">
+              <!-- 由 JS 渲染 -->
+            </div>
+            <p id="frontSubHint" class="text-xs sm:text-sm text-plum-700/75 font-medium">
+              <!-- 由 JS 渲染簡短提示 -->
+            </p>
+          </div>
+
+          <!-- 背面內容（先全英文，淡粉分隔線後小字體中文翻譯） -->
+          <div id="backView" class="hidden text-left space-y-5">
+            <!-- 背面頂部題目小提醒 -->
+            <div class="text-xs font-medium text-blush-600/90 bg-blush-50/80 border border-blush-100 rounded-2xl px-3.5 py-2">
+              <span id="backQuestionReminder"></span>
+            </div>
+
+            <!-- 全英文講稿區塊（大字體、清晰行距、不含中文） -->
+            <div
+              id="backEnglishContent"
+              class="text-[1.12rem] sm:text-[1.18rem] leading-[1.7] text-[#2b1e28] font-normal tracking-[0.005em] break-words"
+            >
+              <!-- 由 JS 渲染全英文 -->
+            </div>
+
+            <!-- 淡粉色分隔線 -->
+            <hr class="border-t border-blush-200/90 my-2" />
+
+            <!-- 小字體中文翻譯區塊 -->
+            <div class="space-y-1">
+              <div class="text-[0.72rem] font-semibold uppercase tracking-wider text-blush-500/90">中文翻譯</div>
+              <div
+                id="backChineseContent"
+                class="text-[0.83rem] sm:text-[0.86rem] leading-[1.68] text-[#6d5a6a] font-normal break-words"
+              >
+                <!-- 由 JS 渲染中文翻譯 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片底部輕提示 -->
+        <div class="pt-3 border-t border-blush-100/80 flex items-center justify-between text-xs text-plum-700/70">
+          <span id="flipPromptText">👆 點擊卡片或按空白鍵翻面看講稿</span>
+          <span class="hidden sm:inline">支援 ← → 切換 · 空白鍵翻面</span>
+        </div>
+      </article>
+
+      <!-- 主操作按鈕列：上一張 / 翻面 / 下一張 -->
+      <div class="mt-4 grid grid-cols-3 gap-2.5 sm:gap-3">
+        <button
+          id="prevBtn"
+          type="button"
+          class="py-3.5 px-4 rounded-2xl bg-white/95 hover:bg-blush-50 active:scale-[0.98] border border-blush-200 text-plum-800 font-semibold text-sm sm:text-base shadow-sm transition-all flex items-center justify-center gap-1.5"
+        >
+          <span>←</span>
+          <span>上一張</span>
+        </button>
+
+        <button
+          id="flipBtn"
+          type="button"
+          class="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blush-500 to-pink-500 hover:from-blush-600 hover:to-pink-600 active:scale-[0.98] text-white font-bold text-sm sm:text-base shadow-soft-btn transition-all flex items-center justify-center gap-1.5"
+        >
+          <span>🔄</span>
+          <span id="flipBtnText">查看背面</span>
+        </button>
+
+        <button
+          id="nextBtn"
+          type="button"
+          class="py-3.5 px-4 rounded-2xl bg-white/95 hover:bg-blush-50 active:scale-[0.98] border border-blush-200 text-plum-800 font-semibold text-sm sm:text-base shadow-sm transition-all flex items-center justify-center gap-1.5"
+        >
+          <span>下一張</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- 學習狀態標記列：待重溫 / 已熟習 -->
+      <div class="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3">
+        <button
+          id="markReviewBtn"
+          type="button"
+          class="py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+        >
+          <span>📌</span>
+          <span>標記待重溫</span>
+        </button>
+
+        <button
+          id="markMasteredBtn"
+          type="button"
+          class="py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+        >
+          <span>✅</span>
+          <span>標記已熟習</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- 底部提示說明 -->
+    <footer class="mt-7 text-center text-xs text-plum-700/70 space-y-1">
+      <p>小提示：手機可左右滑動切換卡片；電腦可使用鍵盤 <kbd class="px-1.5 py-0.5 rounded bg-white border border-blush-200 font-semibold">Space</kbd> 翻面、<kbd class="px-1.5 py-0.5 rounded bg-white border border-blush-200 font-semibold">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-blush-200 font-semibold">→</kbd> 換卡。</p>
+      <p>所有熟習與待重溫紀錄會自動儲存於本機瀏覽器。</p>
+    </footer>
+  </div>
+
+  <!-- 自訂重設紀錄確認彈窗（不使用原生 confirm()） -->
+  <div id="resetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-plum-900/40 backdrop-blur-sm">
+    <div class="bg-white border border-blush-200 rounded-3xl max-w-sm w-full p-6 shadow-soft-pink space-y-4">
+      <div class="text-center space-y-1.5">
+        <div class="text-3xl">🧹</div>
+        <h3 class="text-lg font-bold text-plum-900">確定重設學習紀錄嗎？</h3>
+        <p class="text-sm text-plum-700">這將會清除所有「已熟習」與「待重溫」標記，卡片內容不會受影響。</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button id="cancelResetBtn" type="button" class="py-2.5 px-4 rounded-2xl bg-blush-50 hover:bg-blush-100 text-plum-800 text-sm font-semibold transition-colors">
+          取消
+        </button>
+        <button id="confirmResetBtn" type="button" class="py-2.5 px-4 rounded-2xl bg-blush-500 hover:bg-blush-600 text-white text-sm font-semibold shadow-soft-btn transition-colors">
+          確認重設
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 輕量提示吐司（Toast） -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-2">
+    <div id="toastText" class="px-4 py-2.5 rounded-2xl bg-plum-900/90 text-white text-xs sm:text-sm font-medium shadow-lg whitespace-nowrap"></div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. 完整 30 條題目與講稿資料（嚴格核對，動態生成 180 張卡片）
+     * ============================================================================
+     */
+
+    // 組別中文名稱對照表
+    const GROUP_META = {
+      GP1: { label: 'GP1 人物篇' },
+      GP2: { label: 'GP2 經歷與回憶' },
+      GP3: { label: 'GP3 夢想與未來' },
+      GP4: { label: 'GP4 挑戰與任務' },
+      GP5: { label: 'GP5 媒體與休閒' },
+      GP6: { label: 'GP6 物品篇' },
+      GP7A: { label: 'GP7A 食物篇' },
+      GP7B: { label: 'GP7B 景點與動物' }
+    };
+
+    // 各組共用 Reasons 定義
+    const SHARED_REASONS = {
+      GP1: {
+        r1: {
+          en: "The first and most important reason is that he is a very caring and patient person. I've never seen him mad or impatient, even once. I remember once I was in a car accident, and I was very panicked. I called him immediately, even in the middle of the night. He came to stay with me without asking any questions. When I saw him, I calmed down immediately. He is always the person I can rely on.",
+          zh: "第一個原因（描述性格）：第一個也是最重要的原因是，他是一個非常有愛心和耐心的人。我從來沒有見過他發脾氣或不耐煩，一次都沒有。我還記得有一次我遇到了車禍，當時我非常驚慌。我在深夜打電話給他幫忙，他二話不說立即出來陪著我。看到他的時候，我馬上冷靜下來，他一直是我可以依靠的人（我的主心骨）。"
+        },
+        r2: {
+          en: "Another point I want to highlight is that he helps me to think positively and solve my problems. When I face difficulties in my studies, he is always there to listen to me patiently. I really appreciate his time and good advice.",
+          zh: "第二個原因（如何幫助你）：另一個我想強調的重點是，他幫助我正面思考並解決我的問題。當我在學習上遇到困難時，他總會在那裡耐心地聆聽我。我非常感激他花的時間和好建議。"
+        },
+        r3: {
+          en: "The final point I want to make is that he gives me a lot of support and courage. For instance, I was always afraid to try new things. He encouraged me to step out of my comfort zone. He showed me how to face challenges with a smile. He is a great role model to me, and I will never forget his kindness.",
+          zh: "第三個原因（對你的深遠影響）：最後我想提出的一點是，他給了我很多支持和勇氣。例如，我以前總是不敢嘗試新事物。他鼓勵我走出舒適圈，並教導我如何微笑面對挑戰。他是我極好的榜樣，我永遠不會忘記他的善良。"
+        }
+      },
+      GP2: {
+        r1: {
+          en: "The first and most important reason is that it was the last time my whole family was together. My grandfather passed away shortly after that, so I am very glad we had that happy day. That is why this day is so precious and important to me.",
+          zh: "第一個原因（背景）：第一個也是最重要的原因是，那是我全家人最後一次齊人聚在一起。我爺爺在那之後不久就離世了，所以我很慶幸我們度過了那快樂的一天。這就是為什麼這一天對我來說如此珍貴和重要。"
+        },
+        r2: {
+          en: "Another point I want to highlight is that we had a really funny and unexpected surprise. On our way to dinner, we got lost in a small street and couldn't find the restaurant. Of course, everyone was tired and hungry, but nobody blamed me for leading the way. Luckily, we accidentally found a hidden night market with amazing street food and live music. My grandfather even danced to the music! It became the best part of the whole day, and luckily, we took many photos of that happy moment.",
+          zh: "第二個原因（當日細節）：另一個我想強調的重點是，我們遇到了一個非常有趣又意想不到的驚喜。去吃晚飯的路上，我們在一條小街裡迷路了，找不到那間餐廳。當然大家都又累又肚餓，但沒有人怪責帶路的我。幸運的是，我們意外發現了一個隱藏的夜市，裡面有超棒的街頭美食和現場音樂。我爺爺甚至跟著音樂跳起舞來！這成了整天最棒的部分，而且很幸運，我們拍了很多那個快樂瞬間的照片。"
+        },
+        r3: {
+          en: "Last but not least, this experience brought my family and me closer. Whenever I miss my grandfather or feel stressed, I look at those photos and feel warm again. I will always keep this wonderful memory in my heart.",
+          zh: "第三個原因（感受）：最後但同樣重要的是，這次經歷拉近了我和家人的距離。每當我想念爺爺或感到有壓力時，我都會看看那些照片，然後再次感到溫暖。我會永遠把這個美好的回憶留在心裡。"
+        }
+      },
+      GP3: {
+        r1: {
+          en: "First of all, it would give me a chance to learn new things. For example, I could explore different cultures and see the beautiful world.",
+          zh: "第一個原因（學習與體驗）：首先，它會給我一個學習新事物的機會。例如，我可以探索不同的文化並看看這個美麗的世界。"
+        },
+        r2: {
+          en: "Secondly, another reason is that it would help me to relax and escape from my daily stress. I would have the freedom to do things I truly love.",
+          zh: "第二個原因（放鬆與自由）：其次，另一個原因是它會幫助我放鬆並逃離日常的壓力。我將擁有自由去做我真正熱愛的事情。"
+        },
+        r3: {
+          en: "Finally, the most important reason is that it would make my life more meaningful. I believe this wonderful experience would make me a happier person.",
+          zh: "第三個原因（人生意義）：最後，最重要的原因是它會讓我的生活更有意義。我相信這個美好的經歷會讓我成為一個更快樂的人。"
+        }
+      },
+      GP4: {
+        r1: {
+          en: "First of all, it was a very challenging but meaningful experience. For example, we had to spend a lot of time preparing for it.",
+          zh: "第一個原因（面對挑戰與準備）：首先，這是一次非常具有挑戰性但有意義的經歷。例如，我們必須花很多時間為此做準備。"
+        },
+        r2: {
+          en: "Secondly, another reason is that I could use my knowledge to help my teammates. I was very glad to see them smile when we solved the problem.",
+          zh: "第二個原因（運用知識與助人）：其次，另一個原因是我可以運用我的知識來幫助我的隊友。當我們解決問題時，我很高興看到他們微笑。"
+        },
+        r3: {
+          en: "Finally, the most important reason is that it gave me a sense of achievement and confidence. I will always remember this hard-working process.",
+          zh: "第三個原因（個人成長）：最後，最重要的原因是它給了我一種成就感和自信心。我會永遠記住這個努力奮鬥的過程。"
+        }
+      },
+      GP5: {
+        r1: {
+          en: "First of all, it is a great way to relax and reduce my daily stress. For example, I can forget all my worries when I focus on it.",
+          zh: "第一個原因（放鬆與減壓）：首先，這是一個放鬆和減少日常壓力的好方法。例如，當我專注於它時，我可以忘記所有的煩惱。"
+        },
+        r2: {
+          en: "Secondly, another reason is that it gives me a lot of inspiration and positive energy. I can learn how to understand myself better and stay focused.",
+          zh: "第二個原因（啟發與自我了解）：其次，另一個原因是它給了我很多啟發和正能量。我可以學習如何更好地了解自己並保持專注。"
+        },
+        r3: {
+          en: "Finally, the most important reason is that it brings me pure joy and happiness. It is the best part of my day, and I really enjoy every minute of it.",
+          zh: "第三個原因（純粹的快樂）：最後，最重要的原因是它帶給我純粹的快樂和幸福感。這是我一天中最美好的部分，我非常享受其中的每一分鐘。"
+        }
+      },
+      GP6: {
+        r1: {
+          en: "First of all, it is a very useful and important tool for me. For example, I always use it to study and organize my schedule.",
+          zh: "第一個原因（實用性與功能）：首先，對我來說它是一個非常有用且重要的工具。例如，我總是使用它來學習和安排我的行程。"
+        },
+        r2: {
+          en: "Secondly, another reason is that it brings me a lot of fun and good memories. I can use it to play games and listen to music when I am stressed.",
+          zh: "第二個原因（娛樂與減壓）：其次，另一個原因是它帶給我很多樂趣和美好的回憶。當我有壓力時，我可以使用它來玩遊戲和聽音樂。"
+        },
+        r3: {
+          en: "Finally, the most important reason is that it makes my life much easier and happier. I always keep it by my side, and I cannot imagine my life without it.",
+          zh: "第三個原因（依賴與情感連結）：最後，最重要的原因是它讓我的生活變得更輕鬆、更快樂。我總是把它帶在身邊，我無法想像沒有它的生活。"
+        }
+      }
+    };
+
+    // 全部 30 條題目精確清單（No.1 至 No.30）
+    const TOPICS = [
+      // === GP1 人物篇 (No. 1, 3, 11, 23) ===
+      {
+        no: 1,
+        group: 'GP1',
+        question: 'Describe a family member/relative whom you would like to spend the day with.',
+        topicPhrase: 'a family member or relative whom I would like to spend the day with',
+        topicZh: '我想共度一天的親戚或家庭成員',
+        type: 'person',
+        typeZh: '人物',
+        answer: 'my uncle',
+        answerZh: '我的叔叔',
+        endType: 'person',
+        endTypeZh: '這個人',
+        futureHope: 'spend more time with him',
+        futureHopeZh: '花更多時間和他在一起',
+        hasLookingBack: true,
+        hookEn: 'He is my uncle. I really want to spend a whole day chatting with him.',
+        hookZh: '他是我叔叔。我真的很想花一整天和他聊天。'
+      },
+      {
+        no: 3,
+        group: 'GP1',
+        question: 'Describe a person who has had a great influence on your life.',
+        topicPhrase: 'a person who has had a great influence on my life',
+        topicZh: '對我生活有重大影響的人',
+        type: 'person',
+        typeZh: '人物',
+        answer: 'Jayden',
+        answerZh: 'Jayden',
+        endType: 'person',
+        endTypeZh: '這個人',
+        futureHope: 'spend more time with him',
+        futureHopeZh: '花更多時間和他在一起',
+        hasLookingBack: true,
+        hookEn: 'He is my senior at school, and he has changed my life a lot.',
+        hookZh: '他是我學校的學長，他改變了我很多。'
+      },
+      {
+        no: 11,
+        group: 'GP1',
+        question: 'Describe an elderly person that you know.',
+        topicPhrase: 'an elderly person that I know',
+        topicZh: '一位我認識的長者',
+        type: 'person',
+        typeZh: '人物',
+        answer: 'my neighbor',
+        answerZh: '我的鄰居',
+        endType: 'person',
+        endTypeZh: '這個人',
+        futureHope: 'spend more time with him',
+        futureHopeZh: '花更多時間和他在一起',
+        hasLookingBack: true,
+        hookEn: 'He is my neighbor who is over 70 years old, but he is very energetic.',
+        hookZh: '他是我的鄰居，已經70多歲了，但他非常有活力。'
+      },
+      {
+        no: 23,
+        group: 'GP1',
+        question: 'Describe your best friend.',
+        topicPhrase: 'my best friend',
+        topicZh: '我最好的朋友',
+        type: 'person',
+        typeZh: '人物',
+        answer: 'my ex-colleague Jayden',
+        answerZh: '我的前同事 Jayden',
+        endType: 'person',
+        endTypeZh: '這個人',
+        futureHope: 'spend more time with him',
+        futureHopeZh: '花更多時間和他在一起',
+        hasLookingBack: true,
+        hookEn: 'We have known each other for many years, and he is my best friend.',
+        hookZh: '我們認識很多年了，他是我最好的朋友。'
+      },
+
+      // === GP2 經歷與回憶篇 (No. 2, 4, 10, 12, 22, 27) ===
+      {
+        no: 2,
+        group: 'GP2',
+        question: 'Describe an important day in your life.',
+        topicPhrase: 'an important day in my life',
+        topicZh: '我生命中重要的一天',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: 'It happened during a family picnic in the country park last year.',
+        hookZh: '這發生在去年郊野公園的一次家庭野餐中。'
+      },
+      {
+        no: 4,
+        group: 'GP2',
+        question: 'Describe an interesting trip you have taken.',
+        topicPhrase: 'an interesting trip I have taken',
+        topicZh: '一次我參加過的有趣旅行',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: 'It was a short trip to Shenzhen with my family last summer.',
+        hookZh: '這是去年夏天我和家人去深圳的短途旅行。'
+      },
+      {
+        no: 10,
+        group: 'GP2',
+        question: 'Describe an interesting incident you have experienced.',
+        topicPhrase: 'an interesting incident I have experienced',
+        topicZh: '一件我經歷過的有趣事件',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: 'It happened during a family picnic in the country park last year.',
+        hookZh: '這發生在去年郊野公園的一次家庭野餐中。'
+      },
+      {
+        no: 12,
+        group: 'GP2',
+        question: 'Describe a happy day in your life.',
+        topicPhrase: 'a happy day in my life',
+        topicZh: '我生命中快樂的一天',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: "We had a big dinner to celebrate my grandmother's birthday.",
+        hookZh: '我們吃了一頓大餐來慶祝我祖母的生日。'
+      },
+      {
+        no: 22,
+        group: 'GP2',
+        question: 'Describe a family gathering you attended.',
+        topicPhrase: 'a family gathering I attended',
+        topicZh: '一次我參加的家庭聚會',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: "We had a big dinner to celebrate my grandmother's birthday.",
+        hookZh: '我們吃了一頓大餐來慶祝我祖母的生日。'
+      },
+      {
+        no: 27,
+        group: 'GP2',
+        question: 'Describe an unforgettable experience you had.',
+        topicPhrase: 'an unforgettable experience I had',
+        topicZh: '一次我難忘的經歷',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a short trip to Shenzhen with my family when I was young',
+        answerZh: '我小時候和家人去深圳的短途旅行',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time with my family',
+        futureHopeZh: '花更多時間和家人在一起',
+        hasLookingBack: true,
+        hookEn: 'It was a short trip to Shenzhen with my family last summer.',
+        hookZh: '這是去年夏天我和家人去深圳的短途旅行。'
+      },
+
+      // === GP3 夢想與未來篇 (No. 5, 9, 19, 26, 30) ===
+      {
+        no: 5,
+        group: 'GP3',
+        question: 'Describe your ideal job.',
+        topicPhrase: 'my ideal job',
+        topicZh: '我的理想工作',
+        type: 'thing',
+        typeZh: '事物',
+        answer: 'being a travel blogger',
+        answerZh: '成為一名旅遊網誌作者',
+        endType: 'thing',
+        endTypeZh: '這件事物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'My ideal job is to be a travel blogger, so I can work and travel at the same time.',
+        hookZh: '我的理想工作是成為一名旅遊網誌作者，這樣我就能邊工作邊旅行。'
+      },
+      {
+        no: 9,
+        group: 'GP3',
+        question: 'Describe a famous person whom you would like to meet.',
+        topicPhrase: 'a famous person whom I would like to meet',
+        topicZh: '一位我想見的名人',
+        type: 'person',
+        typeZh: '人物',
+        answer: 'a famous travel vlogger',
+        answerZh: '一位著名的旅遊影音創作者',
+        endType: 'person',
+        endTypeZh: '這個人物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'I really want to meet a famous travel vlogger to learn from him.',
+        hookZh: '我真的很想見一位著名的旅遊影音創作者，向他學習。'
+      },
+      {
+        no: 19,
+        group: 'GP3',
+        question: 'Describe what you would do if you won the jackpot in the Mark Six lottery.',
+        topicPhrase: 'what I would do if I won the jackpot in the Mark Six lottery',
+        topicZh: '如果我中了六合彩頭獎會做的事',
+        type: 'thing',
+        typeZh: '計劃',
+        answer: 'traveling around the world',
+        answerZh: '環遊世界',
+        endType: 'thing',
+        endTypeZh: '這個計劃',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'If I won the Mark Six lottery, I would use the money to travel around the world.',
+        hookZh: '如果我中了六合彩，我會用這筆錢去環遊世界。'
+      },
+      {
+        no: 26,
+        group: 'GP3',
+        question: 'Describe a place in the world you would like to visit.',
+        topicPhrase: 'a place in the world I would like to visit',
+        topicZh: '一個我想去參觀的地方',
+        type: 'place',
+        typeZh: '地點',
+        answer: 'Switzerland',
+        answerZh: '瑞士',
+        endType: 'place',
+        endTypeZh: '這個地方',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'My biggest dream is to travel to Switzerland. It is a very beautiful country.',
+        hookZh: '我最大的夢想是去瑞士旅行。它是一個非常美麗的國家。'
+      },
+      {
+        no: 30,
+        group: 'GP3',
+        question: 'Describe one of your dreams.',
+        topicPhrase: 'one of my dreams',
+        topicZh: '我的一個夢想',
+        type: 'thing',
+        typeZh: '夢想',
+        answer: 'traveling to Switzerland',
+        answerZh: '去瑞士旅行',
+        endType: 'thing',
+        endTypeZh: '這個夢想',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'My biggest dream is to travel to Switzerland. It is a very beautiful country.',
+        hookZh: '我最大的夢想是去瑞士旅行。它是一個非常美麗的國家。'
+      },
+
+      // === GP4 挑戰與任務篇 (No. 6, 20, 24, 29) ===
+      {
+        no: 6,
+        group: 'GP4',
+        question: 'Describe a competition (or contest) that you have entered.',
+        topicPhrase: 'a competition that I have entered',
+        topicZh: '一次我參加過的比賽',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a community project competition last year',
+        answerZh: '去年的一個社區計畫比賽',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It was a community project competition last year, and my team worked very hard.',
+        hookZh: '這是去年的一個社區計畫比賽，我的團隊非常努力。'
+      },
+      {
+        no: 20,
+        group: 'GP4',
+        question: 'Describe your favorite school subject.',
+        topicPhrase: 'my favorite school subject',
+        topicZh: '我最喜歡的學校科目',
+        type: 'thing',
+        typeZh: '科目',
+        answer: 'psychology',
+        answerZh: '心理學',
+        endType: 'thing',
+        endTypeZh: '這個科目',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'My favorite subject is psychology/sociology because it helps me understand people.',
+        hookZh: '我最喜歡的科目是心理學/社會學，因為它幫助我了解人類。',
+        customReasons: {
+          r1: {
+            en: 'First of all, it is a very challenging but meaningful experience. For example, we had to spend a lot of time preparing for it.',
+            zh: '第一個原因（面對挑戰與準備）：首先，這是一次非常具有挑戰性但有意義的經歷。例如，我們必須花很多時間為此做準備。'
+          }
+        }
+      },
+      {
+        no: 24,
+        group: 'GP4',
+        question: 'Describe a difficult activity (or assignment) you had to do.',
+        topicPhrase: 'a difficult assignment I had to do',
+        topicZh: '一項我必須完成的困難作業',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'a group presentation about social issues',
+        answerZh: '一個關於社會議題的小組報告',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It was a group presentation about social issues. We had to do a lot of research.',
+        hookZh: '這是一個關於社會議題的小組報告。我們必須做很多研究。'
+      },
+      {
+        no: 29,
+        group: 'GP4',
+        question: 'Describe something you did which helped someone else.',
+        topicPhrase: 'something I did which helped someone else',
+        topicZh: '一件我幫助別人的事',
+        type: 'event',
+        typeZh: '事件',
+        answer: 'helping my classmate with our group assignment',
+        answerZh: '幫助同學完成我們的小組作業',
+        endType: 'event',
+        endTypeZh: '這件事',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'I helped my classmate with our group assignment because he was very stressed.',
+        hookZh: '我幫助同學完成我們的小組作業，因為他壓力很大。'
+      },
+
+      // === GP5 媒體與休閒篇 (No. 8, 13, 15, 18) ===
+      {
+        no: 8,
+        group: 'GP5',
+        question: 'Describe an interesting book, in any languages, you have read.',
+        topicPhrase: 'an interesting book I have read',
+        topicZh: '一本我讀過的有趣書籍',
+        type: 'thing',
+        typeZh: '事物',
+        answer: 'a psychology book about human behavior and emotions',
+        answerZh: '一本探討人類行為和情緒的心理學書籍',
+        endType: 'thing',
+        endTypeZh: '這件事物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is a psychology book that talks about human behavior and emotions.',
+        hookZh: '這是一本探討人類行為和情緒的心理學書籍。'
+      },
+      {
+        no: 13,
+        group: 'GP5',
+        question: 'Describe an interesting film (in any languages) you have seen.',
+        topicPhrase: 'an interesting film I have seen',
+        topicZh: '一部我看過的有趣電影',
+        type: 'thing',
+        typeZh: '事物',
+        answer: 'the animation called Inside Out',
+        answerZh: '名為《玩轉腦朋友》的動畫片',
+        endType: 'thing',
+        endTypeZh: '這件事物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'In my free time, I love watching the animation called Inside Out. It is about our different emotions.',
+        hookZh: '在空閒時間，我喜歡看名為《玩轉腦朋友/頭腦特工隊》的動畫片。它是關於我們不同的情緒的。'
+      },
+      {
+        no: 15,
+        group: 'GP5',
+        question: 'Describe a sport you like.',
+        topicPhrase: 'a sport I like',
+        topicZh: '一項我喜歡的運動',
+        type: 'thing',
+        typeZh: '事物',
+        answer: 'jogging',
+        answerZh: '慢跑',
+        endType: 'thing',
+        endTypeZh: '這件事物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'My favorite sport is jogging. I usually do it in the park near my home.',
+        hookZh: '我最喜歡的運動是慢跑。我通常在我家附近的公園裡做這項運動。'
+      },
+      {
+        no: 18,
+        group: 'GP5',
+        question: 'Describe how you would like to spend your free time.',
+        topicPhrase: 'how I would like to spend my free time',
+        topicZh: '我想如何度過空閒時間',
+        type: 'thing',
+        typeZh: '活動',
+        answer: 'watching the animation called Inside Out',
+        answerZh: '看名為《玩轉腦朋友》的動畫片',
+        endType: 'thing',
+        endTypeZh: '這件事物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'In my free time, I love watching the animation called Inside Out. It is about our different emotions.',
+        hookZh: '在空閒時間，我喜歡看名為《玩轉腦朋友/頭腦特工隊》的動畫片。它是關於我們不同的情緒的。'
+      },
+
+      // === GP6 物品篇 (No. 17, 21, 25) ===
+      {
+        no: 17,
+        group: 'GP6',
+        question: 'Describe a favorite toy you had when you were a child.',
+        topicPhrase: 'a favorite toy I had when I was a child',
+        topicZh: '我小時候最喜歡的玩具',
+        type: 'thing',
+        typeZh: '物品',
+        answer: 'a smart tablet for kids',
+        answerZh: '一部兒童智能平板',
+        endType: 'thing',
+        endTypeZh: '這件物品',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It was a smart tablet for kids. My parents gave it to me when I was seven years old.',
+        hookZh: '那是一部兒童智能平板。我七歲時父母送給我的。',
+        customReasons: {
+          r1: {
+            en: 'First of all, it was a very useful and important tool for me. For example, I used it to play simple games.',
+            zh: '第一個原因（實用性與功能）：首先，對我來說它是一個非常有用且重要的工具。例如，我用它來玩簡單的遊戲。'
+          }
+        }
+      },
+      {
+        no: 21,
+        group: 'GP6',
+        question: 'Describe a personal possession which means a lot to you.',
+        topicPhrase: 'a personal possession which means a lot to me',
+        topicZh: '一件對我意義重大的個人物品',
+        type: 'thing',
+        typeZh: '物品',
+        answer: 'my tablet computer',
+        answerZh: '我的平板電腦',
+        endType: 'thing',
+        endTypeZh: '這件物品',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is my tablet computer. It was a gift from my parents when I entered college.',
+        hookZh: '它是我的平板電腦。那是我上大學時父母送的禮物。'
+      },
+      {
+        no: 25,
+        group: 'GP6',
+        question: 'Describe something you cannot live without.',
+        topicPhrase: 'something I cannot live without',
+        topicZh: '生活中我不能沒有的東西',
+        type: 'thing',
+        typeZh: '物品',
+        answer: 'my smartphone',
+        answerZh: '我的智能手機',
+        endType: 'thing',
+        endTypeZh: '這件物品',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is definitely my smartphone. It connects me to the whole world.',
+        hookZh: '那絕對是我的智能手機。它將我與全世界連結起來。'
+      },
+
+      // === GP7A 食物篇 (No. 16, 28) ===
+      {
+        no: 28,
+        group: 'GP7A',
+        question: 'Describe your favorite meal.',
+        topicPhrase: 'my favorite meal',
+        topicZh: '我最喜歡的一餐',
+        type: 'thing',
+        typeZh: '食物',
+        answer: 'Yunnan rice noodles',
+        answerZh: '雲南米線',
+        endType: 'thing',
+        endTypeZh: '這道食物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is Yunnan rice noodles. I usually eat it with my friends for dinner.',
+        hookZh: '它是雲南米線。我通常和朋友一起吃晚餐。',
+        customReasons: {
+          r1: {
+            en: 'First of all, the taste is very delicious. For example, it is very spicy and rich.',
+            zh: '第一個原因（味道）：首先，味道非常美味。例如，它非常辛辣且濃郁。'
+          },
+          r2: {
+            en: 'Secondly, another reason is about my feeling. Eating it makes me feel warm and happy. I really love this special feeling.',
+            zh: '第二個原因（身體感受）：其次，另一個原因是關於我的感受。吃它讓我感到溫暖和快樂。我真的很喜歡這種特別的感覺。'
+          },
+          r3: {
+            en: 'Finally, it is about my daily habit. I always order it when I eat out. It is definitely my favorite food in the world.',
+            zh: '第三個原因（日常習慣）：最後，這是關於我的日常習慣。我總是在出外用餐時點它。它絕對是我世界上最喜歡的食物。'
+          }
+        }
+      },
+      {
+        no: 16,
+        group: 'GP7A',
+        question: 'Describe a food or dish you dislike.',
+        topicPhrase: 'a food or dish I dislike',
+        topicZh: '一種我不喜歡的食物或菜式',
+        type: 'thing',
+        typeZh: '食物',
+        answer: 'bitter melon',
+        answerZh: '苦瓜',
+        endType: 'thing',
+        endTypeZh: '這道食物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: "It is bitter melon. I really don't like it since I was a child.",
+        hookZh: '它是苦瓜。我從小就不喜歡它。',
+        customReasons: {
+          r1: {
+            en: 'First of all, the taste is very weird. For example, it is very bitter.',
+            zh: '第一個原因（味道）：首先，味道非常奇怪。例如，它非常苦。'
+          },
+          r2: {
+            en: 'Secondly, another reason is about my feeling. Eating it makes me feel uncomfortable. I really hate this special feeling.',
+            zh: '第二個原因（身體感受）：其次，另一個原因是關於我的感受。吃它讓我感到不舒服。我真的很討厭這種特別的感覺。'
+          },
+          r3: {
+            en: 'Finally, it is about my daily habit. I always avoid this dish. It is definitely my least favorite food in the world.',
+            zh: '第三個原因（日常習慣）：最後，這是關於我的日常習慣。我總是避開這道菜。它絕對是我世界上最不喜歡的食物。'
+          }
+        }
+      },
+
+      // === GP7B 景點與動物篇 (No. 7, 14) ===
+      {
+        no: 14,
+        group: 'GP7B',
+        question: 'Describe a Hong Kong tourist place you recommend for sightseeing.',
+        topicPhrase: 'a Hong Kong tourist place I recommend for sightseeing',
+        topicZh: '一個我推薦的香港旅遊景點',
+        type: 'place',
+        typeZh: '地點',
+        answer: 'Ocean Park',
+        answerZh: '海洋公園',
+        endType: 'place',
+        endTypeZh: '這個地方',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is Ocean Park. It is a very famous theme park in Hong Kong.',
+        hookZh: '它是海洋公園。它是香港非常著名的主題公園。',
+        customReasons: {
+          r1: {
+            en: 'First of all, it is very beautiful and exciting. For example, there are many fun rides.',
+            zh: '第一個原因（外觀與特色）：首先，它非常美麗且令人興奮。例如，那裡有很多好玩的機動遊戲。'
+          },
+          r2: {
+            en: 'Secondly, it is a great choice for relaxing. I always feel so happy when I visit this place.',
+            zh: '第二個原因（放鬆心情）：其次，這是一個放鬆的好選擇。當我參觀這個地方時，我總是感到很高興。'
+          },
+          r3: {
+            en: 'Finally, the most important reason is that it is very famous and popular. I highly recommend everyone to go there.',
+            zh: '第三個原因（受歡迎程度）：最後，最重要的原因是它非常有名和受歡迎。我強烈推薦大家去那裡。'
+          }
+        }
+      },
+      {
+        no: 7,
+        group: 'GP7B',
+        question: 'Describe an animal you like.',
+        topicPhrase: 'an animal I like',
+        topicZh: '一種我喜歡的動物',
+        type: 'thing',
+        typeZh: '動物',
+        answer: 'the giant panda',
+        answerZh: '大熊貓',
+        endType: 'thing',
+        endTypeZh: '這種動物',
+        futureHope: 'spend more time on it',
+        futureHopeZh: '花更多時間在它身上',
+        hasLookingBack: false,
+        hookEn: 'It is the giant panda. They are very cute and you can see them in Ocean Park.',
+        hookZh: '它是大熊貓。牠們非常可愛，你可以在海洋公園看到牠們。',
+        customReasons: {
+          r1: {
+            en: 'First of all, it is very cute and special. For example, it has a funny round body.',
+            zh: '第一個原因（外觀與特色）：首先，它非常可愛且特別。例如，它有一個有趣的圓滾滾身體。'
+          },
+          r2: {
+            en: 'Secondly, it is a great choice for relaxing. I always feel so happy when I look at them.',
+            zh: '第二個原因（放鬆心情）：其次，這是一個放鬆的好選擇。當我看著牠們時，我總是感到很高興。'
+          },
+          r3: {
+            en: 'Finally, the most important reason is that it is very famous and popular. I highly recommend everyone to learn more about them.',
+            zh: '第三個原因（受歡迎程度）：最後，最重要的原因是它非常有名和受歡迎。我強烈推薦大家多了解牠們。'
+          }
+        }
+      }
+    ];
+
+    // 依題號 1 至 30 排序
+    TOPICS.sort((a, b) => a.no - b.no);
+
+    /**
+     * 動態生成全部 180 張卡片（30 開頭 + 30 結尾 + 30 扣題句 + 90 Reasons）
+     */
+    function buildAll180Cards() {
+      const cards = [];
+
+      // 1. 開頭（30 張）
+      TOPICS.forEach((t) => {
+        const en = `Good morning / afternoon, examiner. Thank you for giving me this interesting topic. Today, I would like to talk about ${t.topicPhrase}. The specific ${t.type} I want to share with you is ${t.answer}. There are three main reasons why I chose this, and I will explain them briefly.`;
+        const zh = `早安/午安，考官。謝謝你給我這個有趣的題目。今天，我想談論關於${t.topicZh}。我想跟你分享的特定${t.typeZh}是${t.answerZh}。我選擇這個有三個主要原因，我將簡短地解釋一下。`;
+        cards.push({
+          id: `no${t.no}-opening`,
+          no: t.no,
+          group: t.group,
+          groupLabel: GROUP_META[t.group].label,
+          category: 'opening',
+          subCategory: 'opening',
+          tagLabel: '開頭',
+          question: t.question,
+          frontMode: 'prefix', // 開頭 + 題目
+          frontBadge: '開頭',
+          frontHint: '請說出完整萬能開頭並帶出特定對象與三個原因',
+          en,
+          zh
+        });
+      });
+
+      // 2. 結尾（30 張）
+      TOPICS.forEach((t) => {
+        const lookingBackEn = t.hasLookingBack
+          ? ' Looking back, it has given me a lot of wonderful memories and a very positive feeling.'
+          : '';
+        const lookingBackZh = t.hasLookingBack
+          ? '回顧過去，它給了我很多美好的回憶和非常正面的感受。'
+          : '';
+
+        const en = `Time is running short, so I will come to a conclusion. To sum up, these are the main reasons why this ${t.endType} is so unforgettable to me.${lookingBackEn} In the future, I hope I can ${t.futureHope}. That is the end of my sharing. Thank you very much for listening.`;
+        const zh = `時間差不多了，所以我要來做個總結。總而言之，這些就是為什麼${t.endTypeZh}對我來說如此難忘的主要原因。${lookingBackZh}在未來，我希望我能${t.futureHopeZh}。我的分享到此結束。非常感謝你的聆聽。`;
+
+        cards.push({
+          id: `no${t.no}-ending`,
+          no: t.no,
+          group: t.group,
+          groupLabel: GROUP_META[t.group].label,
+          category: 'ending',
+          subCategory: 'ending',
+          tagLabel: '結尾',
+          question: t.question,
+          frontMode: 'prefix', // 結尾 + 題目
+          frontBadge: '結尾',
+          frontHint: t.hasLookingBack ? '包含 Looking back 回憶句與未來展望' : '簡潔總結、未來展望並禮貌道謝',
+          en,
+          zh
+        });
+      });
+
+      // 3. 扣題句（30 張）
+      TOPICS.forEach((t) => {
+        cards.push({
+          id: `no${t.no}-hook`,
+          no: t.no,
+          group: t.group,
+          groupLabel: GROUP_META[t.group].label,
+          category: 'hook',
+          subCategory: 'hook',
+          tagLabel: '扣題句',
+          question: t.question,
+          frontMode: 'suffix', // 題目 + 扣題句
+          frontBadge: '扣題句',
+          frontHint: '快速接上第一句切題回應',
+          en: t.hookEn,
+          zh: t.hookZh
+        });
+      });
+
+      // 4. Reason 1, Reason 2, Reason 3（90 張）
+      TOPICS.forEach((t) => {
+        ['r1', 'r2', 'r3'].forEach((rKey, idx) => {
+          const reasonNum = idx + 1;
+          const baseReason = SHARED_REASONS[t.group]?.[rKey];
+          const customReason = t.customReasons?.[rKey];
+          const chosen = customReason || baseReason;
+
+          cards.push({
+            id: `no${t.no}-reason${reasonNum}`,
+            no: t.no,
+            group: t.group,
+            groupLabel: GROUP_META[t.group].label,
+            category: 'reason',
+            subCategory: `reason${reasonNum}`,
+            tagLabel: `Reason ${reasonNum}`,
+            question: t.question,
+            frontMode: 'suffix', // 題目 + Reason X
+            frontBadge: `Reason ${reasonNum}`,
+            frontHint: `請說出此題的第 ${reasonNum} 個原因與例句`,
+            en: chosen.en,
+            zh: chosen.zh
+          });
+        });
+      });
+
+      return cards;
+    }
+
+    const ALL_CARDS = buildAll180Cards();
+
+    /**
+     * ============================================================================
+     * 2. 狀態管理與本機儲存（localStorage）
+     * ============================================================================
+     */
+    const STORAGE_KEY = 'oral_180_flashcards_status_v1';
+
+    const state = {
+      category: 'all',       // 'all' | 'opening' | 'ending' | 'hook' | 'reason'
+      reasonSub: 'all',      // 'all' | 'reason1' | 'reason2' | 'reason3'
+      group: 'all',          // 'all' | 'GP1' ... 'GP7B'
+      topicNo: 'all',        // 'all' | '1' ... '30'
+      reviewOnly: false,
+      isShuffled: false,
+      deck: [],              // 目前篩選後的卡片陣列
+      currentIndex: 0,
+      isFlipped: false,
+      statusMap: {},         // { [cardId]: 'mastered' | 'review' }
+      speechRate: 1.0,       // 0.85 | 1.0
+      speechAccent: 'en-GB', // 'en-GB' | 'en-US'
+      isSpeaking: false
+    };
+
+    // 安全讀取 localStorage
+    function loadStatusFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            state.statusMap = parsed;
+          }
+        }
+      } catch (err) {
+        console.warn('讀取本機進度失敗，將使用預設狀態。', err);
+        state.statusMap = {};
+      }
+    }
+
+    // 安全儲存 localStorage
+    function saveStatusToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.statusMap));
+      } catch (err) {
+        console.warn('儲存本機進度失敗。', err);
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 3. 輔助工具：重點連接詞微粗體、洗牌、Toast 通知、語音朗讀
+     * ============================================================================
+     */
+
+    // 將英文講稿中的重點連接詞與結構句微粗體化（確保純英文不混雜中文）
+    const CONNECTOR_PHRASES = [
+      'Good morning / afternoon, examiner.',
+      'Today, I would like to talk about',
+      'There are three main reasons why I chose this, and I will explain them briefly.',
+      'Time is running short, so I will come to a conclusion.',
+      'To sum up,',
+      'Looking back,',
+      'In the future,',
+      'That is the end of my sharing.',
+      'The first and most important reason is that',
+      'Another point I want to highlight is that',
+      'The final point I want to make is that',
+      'Last but not least,',
+      'First of all,',
+      'Secondly, another reason is that',
+      'Secondly,',
+      'Finally, the most important reason is that',
+      'Finally,',
+      'For instance,',
+      'For example,',
+      'Luckily,',
+      'Of course,',
+      'That is why'
+    ];
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatEnglishWithConnectors(text) {
+      let html = escapeHtml(text);
+      // 依長度由長到短取代，避免短詞先切斷長詞
+      const sorted = [...CONNECTOR_PHRASES].sort((a, b) => b.length - a.length);
+      sorted.forEach((phrase) => {
+        const escapedPhrase = escapeHtml(phrase);
+        const regex = new RegExp(escapedPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        html = html.replace(regex, `<strong class="font-semibold text-plum-900">${escapedPhrase}</strong>`);
+      });
+      return html;
+    }
+
+    // Fisher-Yates 洗牌演算法
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // 輕量 Toast 提示
+    let toastTimer = null;
+    function showToast(msg) {
+      const toastEl = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      toastText.textContent = msg;
+      toastEl.classList.remove('opacity-0', 'translate-y-2');
+      toastEl.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove('opacity-100', 'translate-y-0');
+        toastEl.classList.add('opacity-0', 'translate-y-2');
+      }, 2000);
+    }
+
+    // 停止語音朗讀
+    function stopSpeech() {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      } catch (e) {
+        // 略過不支援環境
+      }
+      state.isSpeaking = false;
+      updateSpeakButtonUI();
+    }
+
+    function updateSpeakButtonUI() {
+      const btn = document.getElementById('speakBtn');
+      const textEl = document.getElementById('speakBtnText');
+      if (state.isSpeaking) {
+        btn.classList.add('bg-blush-500', 'text-white', 'border-blush-500', 'speaking-pulse');
+        btn.classList.remove('bg-blush-50', 'text-blush-700', 'border-blush-200');
+        textEl.textContent = '停止朗讀';
+      } else {
+        btn.classList.remove('bg-blush-500', 'text-white', 'border-blush-500', 'speaking-pulse');
+        btn.classList.add('bg-blush-50', 'text-blush-700', 'border-blush-200');
+        textEl.textContent = state.isFlipped ? '朗讀講稿' : '朗讀題目';
+      }
+    }
+
+    // 啟動 Web Speech API 朗讀英文
+    function speakCurrentCard() {
+      if (!('speechSynthesis' in window)) {
+        showToast('此瀏覽器不支援語音朗讀功能');
+        return;
+      }
+
+      if (state.isSpeaking) {
+        stopSpeech();
+        return;
+      }
+
+      const card = state.deck[state.currentIndex];
+      if (!card) return;
+
+      // 背面朗讀完整英文講稿，正面朗讀英文題目
+      const textToRead = state.isFlipped
+        ? card.en.replace(/\s*\/\s*/g, ' or ')
+        : card.question.replace(/\s*\/\s*/g, ' or ');
+
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = state.speechAccent;
+        utterance.rate = state.speechRate;
+
+        // 嘗試挑選最接近口音的英文語音
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+          const exact = voices.find((v) => v.lang === state.speechAccent);
+          const fallback = voices.find((v) => v.lang.startsWith('en'));
+          if (exact) utterance.voice = exact;
+          else if (fallback) utterance.voice = fallback;
+        }
+
+        utterance.onstart = () => {
+          state.isSpeaking = true;
+          updateSpeakButtonUI();
+        };
+        utterance.onend = () => {
+          state.isSpeaking = false;
+          updateSpeakButtonUI();
+        };
+        utterance.onerror = () => {
+          state.isSpeaking = false;
+          updateSpeakButtonUI();
+        };
+
+        state.isSpeaking = true;
+        updateSpeakButtonUI();
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        state.isSpeaking = false;
+        updateSpeakButtonUI();
+        showToast('語音朗讀啟動失敗，請再試一次');
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 4. 篩選牌組與渲染邏輯
+     * ============================================================================
+     */
+
+    // 初始化題號下拉選單（No.1 – No.30）
+    function populateTopicSelect() {
+      const select = document.getElementById('topicSelect');
+      TOPICS.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = String(t.no);
+        const shortQ = t.question.length > 34 ? t.question.slice(0, 34) + '…' : t.question;
+        opt.textContent = `No.${t.no} (${t.group}) ${shortQ}`;
+        select.appendChild(opt);
+      });
+    }
+
+    // 依目前篩選條件建立 deck
+    function rebuildDeck(preserveCurrentId = false) {
+      const prevCardId = preserveCurrentId && state.deck[state.currentIndex]
+        ? state.deck[state.currentIndex].id
+        : null;
+
+      let filtered = ALL_CARDS.filter((card) => {
+        // 分類篩選
+        if (state.category !== 'all') {
+          if (card.category !== state.category) return false;
+          if (state.category === 'reason' && state.reasonSub !== 'all') {
+            if (card.subCategory !== state.reasonSub) return false;
+          }
+        }
+        // 組別篩選
+        if (state.group !== 'all' && card.group !== state.group) return false;
+        // 題號篩選
+        if (state.topicNo !== 'all' && String(card.no) !== state.topicNo) return false;
+        // 只看待重溫
+        if (state.reviewOnly && state.statusMap[card.id] !== 'review') return false;
+
+        return true;
+      });
+
+      if (state.isShuffled) {
+        filtered = shuffleArray(filtered);
+      }
+
+      state.deck = filtered;
+
+      if (prevCardId) {
+        const idx = state.deck.findIndex((c) => c.id === prevCardId);
+        state.currentIndex = idx >= 0 ? idx : 0;
+      } else {
+        state.currentIndex = 0;
+      }
+
+      state.isFlipped = false;
+      stopSpeech();
+      renderAll();
+    }
+
+    // 更新頁首進度條與統計
+    function updateStatsUI() {
+      const total = ALL_CARDS.length;
+      let mastered = 0;
+      let review = 0;
+
+      ALL_CARDS.forEach((c) => {
+        const st = state.statusMap[c.id];
+        if (st === 'mastered') mastered++;
+        else if (st === 'review') review++;
+      });
+
+      const unmarked = total - mastered - review;
+      const pct = Math.round((mastered / total) * 100);
+
+      document.getElementById('masteredCount').textContent = mastered;
+      document.getElementById('totalCardsHeader').textContent = total;
+      document.getElementById('masteredBar').style.width = `${pct}%`;
+      document.getElementById('masteredPercentText').textContent = `${pct}%`;
+      document.getElementById('progressDetailText').textContent = `待重溫：${review} 張 · 未標記：${unmarked} 張`;
+      document.getElementById('reviewBadgeCount').textContent = review;
+    }
+
+    // 更新篩選按鈕高亮狀態
+    function updateFilterButtonsUI() {
+      // 主分類按鈕
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        const active = btn.dataset.cat === state.category;
+        if (active) {
+          btn.className = 'cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all bg-blush-500 text-white shadow-soft-btn';
+        } else {
+          btn.className = 'cat-btn px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all bg-blush-50 hover:bg-blush-100 text-plum-800 border border-blush-200/80';
+        }
+      });
+
+      // Reason 細分列顯示與高亮
+      const subBar = document.getElementById('reasonSubBar');
+      if (state.category === 'reason') {
+        subBar.classList.remove('hidden');
+        subBar.classList.add('flex');
+      } else {
+        subBar.classList.add('hidden');
+        subBar.classList.remove('flex');
+      }
+
+      document.querySelectorAll('.sub-btn').forEach((btn) => {
+        const active = btn.dataset.sub === state.reasonSub;
+        if (active) {
+          btn.className = 'sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all bg-blush-400 text-white shadow-sm';
+        } else {
+          btn.className = 'sub-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition-all bg-blush-50 hover:bg-blush-100 text-plum-700 border border-blush-200';
+        }
+      });
+
+      // 隨機洗牌按鈕
+      const shuffleBtn = document.getElementById('shuffleBtn');
+      const shuffleLabel = document.getElementById('shuffleLabel');
+      const reshuffleBtn = document.getElementById('reshuffleBtn');
+      if (state.isShuffled) {
+        shuffleBtn.className = 'flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all bg-blush-500 text-white border-blush-500 shadow-soft-btn';
+        shuffleLabel.textContent = '隨機抽卡';
+        reshuffleBtn.classList.remove('hidden');
+      } else {
+        shuffleBtn.className = 'flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all bg-white hover:bg-blush-50 text-plum-800 border-blush-200';
+        shuffleLabel.textContent = '順序模式';
+        reshuffleBtn.classList.add('hidden');
+      }
+
+      // 待重溫模式按鈕
+      const reviewBtn = document.getElementById('reviewOnlyBtn');
+      if (state.reviewOnly) {
+        reviewBtn.className = 'flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all bg-amber-500 text-white border-amber-500 shadow-sm';
+      } else {
+        reviewBtn.className = 'flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all bg-white hover:bg-blush-50 text-plum-800 border-blush-200';
+      }
+    }
+
+    // 渲染單張卡片內容
+    function renderCard(animateType = '') {
+      const emptyState = document.getElementById('emptyState');
+      const cardStage = document.getElementById('cardStage');
+
+      if (state.deck.length === 0) {
+        emptyState.classList.remove('hidden');
+        cardStage.classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      cardStage.classList.remove('hidden');
+
+      const card = state.deck[state.currentIndex];
+      const cardEl = document.getElementById('flashcard');
+
+      // 觸發微動畫
+      cardEl.classList.remove('animate-flip-reveal', 'animate-card-switch');
+      if (animateType === 'flip') {
+        void cardEl.offsetWidth;
+        cardEl.classList.add('animate-flip-reveal');
+      } else if (animateType === 'switch') {
+        void cardEl.offsetWidth;
+        cardEl.classList.add('animate-card-switch');
+      }
+
+      // 進度數字
+      document.getElementById('currentIdxDisplay').textContent = state.currentIndex + 1;
+      document.getElementById('filteredTotalDisplay').textContent = state.deck.length;
+
+      // 題號與組別徽章
+      document.getElementById('cardTopicGroupBadge').textContent = `No.${card.no} · ${card.groupLabel}`;
+
+      // 正反面徽章與切換顯示
+      const sideBadge = document.getElementById('cardSideBadge');
+      const frontView = document.getElementById('frontView');
+      const backView = document.getElementById('backView');
+      const flipBtnText = document.getElementById('flipBtnText');
+      const flipPromptText = document.getElementById('flipPromptText');
+
+      if (!state.isFlipped) {
+        sideBadge.textContent = `正面 · ${card.tagLabel}`;
+        sideBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blush-500 text-white';
+        frontView.classList.remove('hidden');
+        backView.classList.add('hidden');
+        flipBtnText.textContent = '查看背面';
+        flipPromptText.textContent = '👆 點擊卡片或按空白鍵翻面看英文講稿與中文翻譯';
+
+        // 正面格式嚴格依要求：
+        // 開頭/結尾：標籤 + 完整英文題目
+        // 扣題句/Reason：完整英文題目 + 標籤
+        const frontContainer = document.getElementById('frontDisplayContent');
+        if (card.frontMode === 'prefix') {
+          frontContainer.innerHTML = `
+            <span class="inline-block align-middle mr-2 mb-1 px-3 py-0.5 rounded-xl bg-blush-100 text-blush-700 text-base sm:text-lg font-bold border border-blush-200">${escapeHtml(card.frontBadge)}</span>
+            <span class="align-middle">${escapeHtml(card.question)}</span>
+          `;
+        } else {
+          frontContainer.innerHTML = `
+            <span class="align-middle">${escapeHtml(card.question)}</span>
+            <span class="inline-block align-middle ml-2 mt-1 px-3 py-0.5 rounded-xl bg-blush-100 text-blush-700 text-base sm:text-lg font-bold border border-blush-200">${escapeHtml(card.frontBadge)}</span>
+          `;
+        }
+        document.getElementById('frontSubHint').textContent = card.frontHint;
+      } else {
+        sideBadge.textContent = `背面 · ${card.tagLabel}答案`;
+        sideBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-plum-800 text-white';
+        frontView.classList.add('hidden');
+        backView.classList.remove('hidden');
+        flipBtnText.textContent = '返回正面';
+        flipPromptText.textContent = '👆 點擊卡片或按空白鍵返回題目面';
+
+        // 背面頂部題目提示
+        const reminderPrefix = card.frontMode === 'prefix'
+          ? `${card.frontBadge} · ${card.question}`
+          : `${card.question} · ${card.frontBadge}`;
+        document.getElementById('backQuestionReminder').textContent = reminderPrefix;
+
+        // 背面先顯示全英文（重點連接詞微粗體，絕不夾雜中文）
+        document.getElementById('backEnglishContent').innerHTML = formatEnglishWithConnectors(card.en);
+
+        // 下方小字體中文翻譯
+        document.getElementById('backChineseContent').textContent = card.zh;
+      }
+
+      // 更新本張卡片學習狀態顯示
+      const status = state.statusMap[card.id];
+      const statusBadge = document.getElementById('cardStatusBadge');
+      const reviewBtn = document.getElementById('markReviewBtn');
+      const masteredBtn = document.getElementById('markMasteredBtn');
+
+      if (status === 'mastered') {
+        statusBadge.textContent = '✅ 已熟習';
+        statusBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700';
+      } else if (status === 'review') {
+        statusBadge.textContent = '📌 待重溫';
+        statusBadge.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700';
+      } else {
+        statusBadge.className = 'hidden';
+      }
+
+      // 標記按鈕樣式
+      if (status === 'review') {
+        reviewBtn.className = 'py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] bg-amber-500 text-white border-amber-500 shadow-sm';
+        reviewBtn.innerHTML = '<span>📌</span><span>已標記待重溫（點擊取消）</span>';
+      } else {
+        reviewBtn.className = 'py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] bg-white/95 hover:bg-amber-50 text-amber-700 border-amber-200';
+        reviewBtn.innerHTML = '<span>📌</span><span>待重溫</span>';
+      }
+
+      if (status === 'mastered') {
+        masteredBtn.className = 'py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] bg-emerald-500 text-white border-emerald-500 shadow-sm';
+        masteredBtn.innerHTML = '<span>✅</span><span>已熟習（點擊取消）</span>';
+      } else {
+        masteredBtn.className = 'py-3 px-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] bg-white/95 hover:bg-emerald-50 text-emerald-700 border-emerald-200';
+        masteredBtn.innerHTML = '<span>✅</span><span>已熟習</span>';
+      }
+
+      updateSpeakButtonUI();
+    }
+
+    function renderAll() {
+      updateStatsUI();
+      updateFilterButtonsUI();
+      renderCard();
+    }
+
+    /**
+     * ============================================================================
+     * 5. 互動操作（翻卡、切換上下張、標記狀態、鍵盤與觸控滑動）
+     * ============================================================================
+     */
+
+    function toggleFlip() {
+      if (state.deck.length === 0) return;
+      stopSpeech();
+      state.isFlipped = !state.isFlipped;
+      renderCard('flip');
+    }
+
+    function goPrev() {
+      if (state.deck.length === 0) return;
+      stopSpeech();
+      state.currentIndex = (state.currentIndex - 1 + state.deck.length) % state.deck.length;
+      state.isFlipped = false;
+      renderCard('switch');
+    }
+
+    function goNext() {
+      if (state.deck.length === 0) return;
+      stopSpeech();
+      state.currentIndex = (state.currentIndex + 1) % state.deck.length;
+      state.isFlipped = false;
+      renderCard('switch');
+    }
+
+    function setCardStatus(targetStatus) {
+      const card = state.deck[state.currentIndex];
+      if (!card) return;
+
+      if (state.statusMap[card.id] === targetStatus) {
+        delete state.statusMap[card.id];
+        showToast('已取消標記');
+      } else {
+        state.statusMap[card.id] = targetStatus;
+        showToast(targetStatus === 'mastered' ? '✅ 已標記為熟習！' : '📌 已加入待重溫清單');
+      }
+
+      saveStatusToStorage();
+
+      // 若正在「只溫待重溫」模式下取消了待重溫或改為已熟習，自動更新牌組
+      if (state.reviewOnly && state.statusMap[card.id] !== 'review') {
+        const oldIdx = state.currentIndex;
+        rebuildDeck(false);
+        if (state.deck.length > 0) {
+          state.currentIndex = Math.min(oldIdx, state.deck.length - 1);
+          renderAll();
+        }
+        return;
+      }
+
+      updateStatsUI();
+      renderCard();
+    }
+
+    /**
+     * ============================================================================
+     * 6. 事件綁定與初始化
+     * ============================================================================
+     */
+    function bindEvents() {
+      // 主分類按鈕
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.category = btn.dataset.cat;
+          if (state.category !== 'reason') {
+            state.reasonSub = 'all';
+          }
+          rebuildDeck(false);
+        });
+      });
+
+      // Reason 細分按鈕
+      document.querySelectorAll('.sub-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.reasonSub = btn.dataset.sub;
+          rebuildDeck(false);
+        });
+      });
+
+      // 組別篩選下拉選單
+      document.getElementById('groupSelect').addEventListener('change', (e) => {
+        state.group = e.target.value;
+        // 切換組別時，若單獨選中的題號不屬於該組別，重置題號為全部
+        if (state.group !== 'all' && state.topicNo !== 'all') {
+          const found = TOPICS.find((t) => String(t.no) === state.topicNo);
+          if (found && found.group !== state.group) {
+            state.topicNo = 'all';
+            document.getElementById('topicSelect').value = 'all';
+          }
+        }
+        rebuildDeck(false);
+      });
+
+      // 題號快速跳轉下拉選單
+      document.getElementById('topicSelect').addEventListener('change', (e) => {
+        state.topicNo = e.target.value;
+        if (state.topicNo !== 'all') {
+          // 選取特定題號時自動同步組別為全部，避免篩選衝突
+          state.group = 'all';
+          document.getElementById('groupSelect').value = 'all';
+        }
+        rebuildDeck(false);
+      });
+
+      // 順序 / 隨機抽卡切換
+      document.getElementById('shuffleBtn').addEventListener('click', () => {
+        state.isShuffled = !state.isShuffled;
+        rebuildDeck(false);
+        showToast(state.isShuffled ? '🔀 已切換為隨機抽卡模式' : '📋 已切換為順序溫習模式');
+      });
+
+      // 重新洗牌
+      document.getElementById('reshuffleBtn').addEventListener('click', () => {
+        rebuildDeck(false);
+        showToast('↻ 已重新洗牌');
+      });
+
+      // 只溫待重溫模式
+      document.getElementById('reviewOnlyBtn').addEventListener('click', () => {
+        state.reviewOnly = !state.reviewOnly;
+        rebuildDeck(false);
+        showToast(state.reviewOnly ? '📌 只顯示待重溫卡片' : '顯示全部符合條件卡片');
+      });
+
+      // 空狀態還原全部按鈕
+      document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        state.category = 'all';
+        state.reasonSub = 'all';
+        state.group = 'all';
+        state.topicNo = 'all';
+        state.reviewOnly = false;
+        document.getElementById('groupSelect').value = 'all';
+        document.getElementById('topicSelect').value = 'all';
+        rebuildDeck(false);
+      });
+
+      // 點擊卡片翻面（若正在選取複製文字則不誤觸翻面）
+      const flashcardEl = document.getElementById('flashcard');
+      flashcardEl.addEventListener('click', () => {
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 0) return;
+        toggleFlip();
+      });
+
+      // 語音朗讀按鈕（阻止冒泡，避免誤翻卡）
+      document.getElementById('speakBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        speakCurrentCard();
+      });
+
+      // 語速切換
+      document.getElementById('speedBtn').addEventListener('click', () => {
+        state.speechRate = state.speechRate === 1.0 ? 0.85 : 1.0;
+        document.getElementById('speedBtn').textContent = state.speechRate === 1.0 ? '1.0x 正常' : '0.85x 慢速';
+        showToast(`語音速度已設為 ${state.speechRate}x`);
+      });
+
+      // 口音切換
+      document.getElementById('accentBtn').addEventListener('click', () => {
+        state.speechAccent = state.speechAccent === 'en-GB' ? 'en-US' : 'en-GB';
+        document.getElementById('accentBtn').textContent = state.speechAccent === 'en-GB' ? '🇬🇧 英式' : '🇺🇸 美式';
+        showToast(state.speechAccent === 'en-GB' ? '已切換為英式發音 (en-GB)' : '已切換為美式發音 (en-US)');
+      });
+
+      // 控制按鈕
+      document.getElementById('prevBtn').addEventListener('click', goPrev);
+      document.getElementById('flipBtn').addEventListener('click', toggleFlip);
+      document.getElementById('nextBtn').addEventListener('click', goNext);
+      document.getElementById('markReviewBtn').addEventListener('click', () => setCardStatus('review'));
+      document.getElementById('markMasteredBtn').addEventListener('click', () => setCardStatus('mastered'));
+
+      // 重設紀錄彈窗
+      const resetModal = document.getElementById('resetModal');
+      document.getElementById('openResetModalBtn').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+      });
+      document.getElementById('cancelResetBtn').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+      });
+      resetModal.addEventListener('click', (e) => {
+        if (e.target === resetModal) resetModal.classList.add('hidden');
+      });
+      document.getElementById('confirmResetBtn').addEventListener('click', () => {
+        state.statusMap = {};
+        saveStatusToStorage();
+        state.reviewOnly = false;
+        resetModal.classList.add('hidden');
+        rebuildDeck(false);
+        showToast('🧹 已重設所有學習紀錄');
+      });
+
+      // 鍵盤快捷鍵（空白鍵翻面、左右方向鍵切換上下張）
+      document.addEventListener('keydown', (e) => {
+        // 若彈窗開啟或焦點在下拉選單則略過
+        if (!resetModal.classList.contains('hidden')) {
+          if (e.key === 'Escape') resetModal.classList.add('hidden');
+          return;
+        }
+        const tag = document.activeElement?.tagName;
+        if (tag === 'SELECT' || tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (e.code === 'Space' || e.key === ' ') {
+          e.preventDefault();
+          toggleFlip();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          goNext();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          goPrev();
+        }
+      });
+
+      // 手機觸控左右滑動換卡（嚴格判斷水平位移大於垂直位移，不干擾上下閱讀）
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      flashcardEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      flashcardEl.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length !== 1) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        // 水平滑動超過 55px 且明顯大於垂直滾動才換卡
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          if (dx < 0) goNext();
+          else goPrev();
+        }
+      }, { passive: true });
+
+      // 預先載入瀏覽器語音列表
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+    }
+
+    // 啟動應用程式
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStatusFromStorage();
+      populateTopicSelect();
+      bindEvents();
+      rebuildDeck(false);
+    });
+  </script>
+</body>
+</html>
